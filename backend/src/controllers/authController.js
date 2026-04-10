@@ -76,6 +76,8 @@ const login = async (req, res) => {
   try {
     const { identifier, password, role } = req.body;
 
+    console.log("Login request received");
+    console.log(identifier, password, role);
     if (!identifier || !password || !role) {
       return res.status(400).json({ message: 'Please provide identifier, password, and role' });
     }
@@ -91,6 +93,8 @@ const login = async (req, res) => {
          WHERE s.student_id = $1 AND u.role = 'student'`,
         [identifier]
       );
+
+      console.log(result.rows[0])
       user = result.rows[0];
     } else if (role === 'teacher') {
       // Login with teacher_id
@@ -121,9 +125,10 @@ const login = async (req, res) => {
     }
 
     // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
+    // const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = (password === user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid password' });
     }
 
     // Generate token

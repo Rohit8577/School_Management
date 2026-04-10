@@ -87,10 +87,13 @@ class _LoginPageState extends State<LoginPage> {
         final userData = result['data']['user'];
         final role = userData['role'];
 
+        
+
         if (!mounted) return;
 
         Widget dashboard;
         if (role == 'teacher') {
+          print(userData);
           dashboard = TeacherDashboardScreen(userData: userData);
         } else if (role == 'admin') {
           dashboard = AdminDashboardScreen(userData: userData);

@@ -6,6 +6,7 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+
 pool.connect((err, client, release) => {
   if (err) {
     console.error('❌ Database connection error:', err.message);
@@ -18,3 +19,4 @@ pool.connect((err, client, release) => {
 module.exports = {
   query: (text, params) => pool.query(text, params),
 };
+

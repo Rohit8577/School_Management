@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import '../../main.dart';
+import '../main.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -51,225 +51,251 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final stats = dashboardData?['stats'];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FB),
-      body: SafeArea(
-        child: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF0049E6)),
-              )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: const Color(0xFFF8FAFC), // Smooth off-white
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF6366F1)), // Indigo loader
+            )
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Premium Admin Header (Indigo/Purple Gradient)
+                  _buildHeader(user),
+
+                  // 2. Overlapping Stats Cards (Transform translate)
+                  Transform.translate(
+                    offset: const Offset(0, -40),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                'Hello, ${user['name'] ?? 'Admin'} 👋',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF1E293B),
-                                ),
-                                overflow: TextOverflow.ellipsis,
+                              _buildStatCard(
+                                'Students',
+                                '${stats?['totalStudents'] ?? 0}',
+                                Icons.school_outlined,
+                                const Color(0xFF3B82F6), // Blue
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                user['designation'] ?? 'School Administrator',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF475569),
-                                ),
+                              const SizedBox(width: 16),
+                              _buildStatCard(
+                                'Teachers',
+                                '${stats?['totalTeachers'] ?? 0}',
+                                Icons.person_outline,
+                                const Color(0xFF10B981), // Emerald
                               ),
                             ],
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: _logout,
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 10,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.logout_rounded,
-                              color: Color(0xFF0049E6),
-                            ),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              _buildStatCard(
+                                'Classes',
+                                '${stats?['totalClasses'] ?? 0}',
+                                Icons.class_outlined,
+                                const Color(0xFFF59E0B), // Amber
+                              ),
+                              const SizedBox(width: 16),
+                              _buildStatCard(
+                                'Subjects',
+                                '${stats?['totalSubjects'] ?? 0}',
+                                Icons.menu_book_outlined,
+                                const Color(0xFF8B5CF6), // Purple
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 3. Management Quick Actions Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Management',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                            letterSpacing: -0.5,
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        _buildActionTile(
+                          'Manage Students',
+                          'Add, edit or remove students',
+                          Icons.people_alt_outlined,
+                          const Color(0xFF3B82F6),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildActionTile(
+                          'Manage Teachers',
+                          'Add, edit or remove teachers',
+                          Icons.person_add_alt_outlined,
+                          const Color(0xFF10B981),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildActionTile(
+                          'Manage Classes',
+                          'Create or update class sections',
+                          Icons.meeting_room_outlined,
+                          const Color(0xFFF59E0B),
+                        ),
+                        const SizedBox(height: 12),
+                        _buildActionTile(
+                          'Reports',
+                          'View attendance & performance',
+                          Icons.bar_chart_outlined,
+                          const Color(0xFF8B5CF6),
+                        ),
+                        const SizedBox(height: 40), // Bottom padding
                       ],
                     ),
-                    const SizedBox(height: 30),
-
-                    // Role Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF7C3AED), Color(0xFF9333EA)],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        '🏫 Admin Panel',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // School Overview
-                    const Text(
-                      'School Overview',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E293B),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Stats Grid
-                    Row(
-                      children: [
-                        _buildStatCard(
-                          'Students',
-                          '${stats?['totalStudents'] ?? 0}',
-                          Icons.school_outlined,
-                          const Color(0xFF0049E6),
-                        ),
-                        const SizedBox(width: 12),
-                        _buildStatCard(
-                          'Teachers',
-                          '${stats?['totalTeachers'] ?? 0}',
-                          Icons.person_outline,
-                          const Color(0xFF059669),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _buildStatCard(
-                          'Classes',
-                          '${stats?['totalClasses'] ?? 0}',
-                          Icons.class_outlined,
-                          const Color(0xFFD97706),
-                        ),
-                        const SizedBox(width: 12),
-                        _buildStatCard(
-                          'Subjects',
-                          '${stats?['totalSubjects'] ?? 0}',
-                          Icons.menu_book_outlined,
-                          const Color(0xFF7C3AED),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Management Options
-                    const Text(
-                      'Management',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E293B),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildActionTile(
-                      'Manage Students',
-                      'Add, edit or remove students',
-                      Icons.people_alt_outlined,
-                      const Color(0xFF0049E6),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildActionTile(
-                      'Manage Teachers',
-                      'Add, edit or remove teachers',
-                      Icons.person_add_alt_outlined,
-                      const Color(0xFF059669),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildActionTile(
-                      'Manage Classes',
-                      'Create or update class sections',
-                      Icons.meeting_room_outlined,
-                      const Color(0xFFD97706),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildActionTile(
-                      'Reports',
-                      'View attendance & performance reports',
-                      Icons.bar_chart_outlined,
-                      const Color(0xFF7C3AED),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
+    );
+  }
+
+  // --- WIDGET BUILDERS ---
+
+  Widget _buildHeader(Map<String, dynamic> user) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 70),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)], // Indigo to Purple mix
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    '🏫 Admin Panel',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Hello, ${user['name']?.split(' ')[0] ?? 'Admin'} 👋',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  user['designation'] ?? 'School Administrator',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.8),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: _logout,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.logout_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatCard(
-      String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
+              color: const Color(0xFF0F172A).withOpacity(0.04), // Super soft shadow
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: color, size: 22),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
             Text(
               value,
               style: TextStyle(
                 fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: color,
+                fontWeight: FontWeight.w900,
+                color: const Color(0xFF0F172A),
+                letterSpacing: value.length > 3 ? -1 : 0,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF475569),
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF64748B),
               ),
             ),
           ],
@@ -278,56 +304,76 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildActionTile(
-      String title, String subtitle, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+  Widget _buildActionTile(String title, String subtitle, IconData icon, Color color) {
+    return InkWell( // Tap ripple effect 
+      onTap: () {
+        // Yahan navigator logic push karna aage
+        print('$title clicked');
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)), // Subtle light border
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withOpacity(0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1E293B),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF94A3B8),
-                  ),
-                ),
-              ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 26),
             ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF1F5F9),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: Color(0xFF94A3B8),
+                size: 14,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
